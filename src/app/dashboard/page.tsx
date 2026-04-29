@@ -51,6 +51,8 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isSavingAlert, setIsSavingAlert] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [filters, setFilters] = useState({
     category: "all",
     status: "all",
@@ -75,7 +77,19 @@ export default function DashboardPage() {
     type: "all"
   });
 
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, deleteAccount } = useAuth();
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+      setIsDeleteConfirmOpen(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthLoading && !user) {
@@ -152,7 +166,7 @@ export default function DashboardPage() {
 
           <div className="space-y-2 pt-4 border-t border-white/5">
             <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground px-4 mb-4">Account</h3>
-            <SidebarLink icon={<Settings className="w-5 h-5" />} label="Settings" onClick={() => ComingSoon('Settings')} />
+            <SidebarLink icon={<Settings className="w-5 h-5" />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
             <SidebarLink icon={<ShieldCheck className="w-5 h-5" />} label="Security" onClick={() => ComingSoon('Security')} />
           </div>
 
@@ -211,9 +225,9 @@ export default function DashboardPage() {
             <StatsCard icon={<TrendingUp className="text-primary w-4 h-4" />} label="Matches" value="42%" trend="+2.4%" />
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Center Content Area */}
-            <div className="xl:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-6 min-w-0">
                
                {/* OVERVIEW TAB */}
                {activeTab === 'overview' && (
@@ -276,6 +290,77 @@ export default function DashboardPage() {
                          </div>
                        </GlassCard>
                      ))}
+                   </div>
+                 </div>
+               )}
+
+               {/* SETTINGS TAB */}
+               {activeTab === 'settings' && (
+                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                   <div className="px-1">
+                     <h2 className="text-2xl font-black tracking-tight text-white">Account Settings</h2>
+                     <p className="text-sm text-muted-foreground">Manage your profile preferences and account security.</p>
+                   </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <GlassCard className="p-6 border-white/10 !rounded-3xl space-y-4">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center font-black text-white text-2xl shadow-xl shrink-0">
+                            {user?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-black text-lg text-white truncate">{user?.full_name || 'Student Account'}</h3>
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider truncate overflow-hidden text-ellipsis">{user?.email}</p>
+                          </div>
+                        </div>
+                        <div className="pt-4 border-t border-white/5 space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-muted-foreground">Student ID</span>
+                            <span className="text-xs font-black text-white">{user?.student_id || 'Not set'}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-muted-foreground">Account Role</span>
+                            <Badge variant="outline" className="bg-primary/10 text-primary border-none text-[10px] font-black uppercase">{user?.role}</Badge>
+                          </div>
+                        </div>
+                     </GlassCard>
+
+                     <GlassCard className="p-6 border-white/10 !rounded-3xl space-y-4">
+                        <h3 className="font-black text-white">Preferences</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                            <div className="flex items-center gap-3">
+                              <Bell className="w-4 h-4 text-primary" />
+                              <span className="text-xs font-bold">Email Notifications</span>
+                            </div>
+                            <div className="w-10 h-5 bg-primary rounded-full relative"><div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full shadow-lg" /></div>
+                          </div>
+                          <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                            <div className="flex items-center gap-3">
+                              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                              <span className="text-xs font-bold">Public Profile</span>
+                            </div>
+                            <div className="w-10 h-5 bg-white/10 rounded-full relative"><div className="absolute left-1 top-1 w-3 h-3 bg-white/40 rounded-full" /></div>
+                          </div>
+                        </div>
+                     </GlassCard>
+                   </div>
+
+                   <div className="pt-8 border-t border-white/5">
+                     <GlassCard className="p-8 border-destructive/20 bg-destructive/[0.02] !rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-black text-destructive">Danger Zone</h3>
+                          <p className="text-sm text-muted-foreground max-w-md break-words">Deleting your account is permanent. All your reported items, matches, and history will be lost forever.</p>
+                        </div>
+                        <Button 
+                          variant="destructive" 
+                          className="rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl shadow-destructive/20"
+                          onClick={() => setIsDeleteConfirmOpen(true)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete Account
+                        </Button>
+                     </GlassCard>
                    </div>
                  </div>
                )}
@@ -516,6 +601,49 @@ export default function DashboardPage() {
                </div>
             </GlassCard>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* DELETE CONFIRM MODAL */}
+      <AnimatePresence>
+        {isDeleteConfirmOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.95, opacity: 0 }} 
+              className="w-full max-w-md"
+            >
+              <GlassCard className="p-8 border-destructive/30 shadow-3xl !rounded-[2.5rem] space-y-6">
+                <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center text-destructive mx-auto">
+                  <Trash2 className="w-8 h-8" />
+                </div>
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl font-black tracking-tight text-white">Are you absolutely sure?</h2>
+                  <p className="text-sm text-muted-foreground">This action cannot be undone. This will permanently delete your account and remove your data from our servers.</p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Button 
+                    variant="destructive" 
+                    className="h-12 rounded-xl font-black uppercase tracking-widest text-xs"
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                    Yes, Delete My Account
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="h-12 rounded-xl font-bold text-muted-foreground"
+                    onClick={() => setIsDeleteConfirmOpen(false)}
+                    disabled={isDeleting}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </GlassCard>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

@@ -246,7 +246,7 @@ export default function ReportPage() {
           <Sparkles className="w-4 h-4" />
           <span>New Report</span>
         </motion.div>
-        <h1 className="text-5xl md:text-6xl font-black tracking-tighter capitalize">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter capitalize break-words">
           {step === 4 ? "Ready to post?" : formData.type ? `Report ${formData.type} item` : "Tell us what happened"}
         </h1>
         <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
@@ -322,7 +322,7 @@ export default function ReportPage() {
                 </div>
                 <div className="space-y-3">
                   <label className="text-sm font-black uppercase tracking-widest text-muted-foreground ml-1">Category</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {categories.map(cat => (
                       <button
                         key={cat}

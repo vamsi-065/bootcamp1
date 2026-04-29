@@ -15,7 +15,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -33,7 +32,7 @@ export function FloatingNavbar() {
   const { unreadCount } = useNotifications(user?.id ?? null);
 
   useEffect(() => {
-    return scrollY.onChange((latest) => {
+    return scrollY.on("change", (latest) => {
       setIsScrolled(latest > 50);
     });
   }, [scrollY]);
@@ -122,10 +121,10 @@ export function FloatingNavbar() {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 glass border-white/10 bg-[#0f172a]/95 text-white rounded-2xl p-2 shadow-2xl backdrop-blur-xl mt-4">
-                      <DropdownMenuLabel className="px-3 py-2">
+                      <div className="px-3 py-2">
                         <p className="text-sm font-black truncate">{user.full_name || 'Student Account'}</p>
                         <p className="text-[10px] text-muted-foreground font-bold truncate">{user.email}</p>
-                      </DropdownMenuLabel>
+                      </div>
                       <DropdownMenuSeparator className="bg-white/10 mx-2 my-1" />
                       <DropdownMenuItem className="rounded-xl focus:bg-white/5 cursor-pointer flex items-center gap-2 py-2" onClick={() => router.push('/dashboard')}>
                         <User className="w-4 h-4 text-primary" />

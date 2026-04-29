@@ -24,7 +24,8 @@ export function useNotifications(userId: string | null) {
 
     fetchNotifications();
 
-    // 2. Subscribe to real-time notifications
+    // 2. Subscribe to real-time notifications (Temporarily disabled)
+    /*
     const sub = supabase
       .channel(`notifications-${userId}-${Date.now()}`)
       .on('postgres_changes', {
@@ -46,6 +47,7 @@ export function useNotifications(userId: string | null) {
     return () => {
       sub.unsubscribe();
     };
+    */
   }, [userId]);
 
   const markAsRead = async (id: string) => {

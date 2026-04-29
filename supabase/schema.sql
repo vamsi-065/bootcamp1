@@ -31,6 +31,18 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Ensure 'role' column exists (migration helper)
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='role') THEN
+        ALTER TABLE profiles ADD COLUMN role TEXT DEFAULT 'student' CHECK (role IN ('student', 'admin'));
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='student_id') THEN
+        ALTER TABLE profiles ADD COLUMN student_id TEXT;
+    END IF;
+END $$;
+
+
 -- Trigger to create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -195,3 +207,73 @@ BEGIN
   LIMIT p_limit;
 END;
 $$;
+
+-- 9. RLS POLICIES (Row Level Security)
+
+
+-- Profiles
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public profiles are viewable by everyone" ON profiles
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert their own profile" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Lost Items
+ALTER TABLE lost_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Lost items are viewable by everyone" ON lost_items
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert their own lost items" ON lost_items
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own lost items" ON lost_items
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own lost items" ON lost_items
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Found Items
+ALTER TABLE found_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Found items are viewable by everyone" ON found_items
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert their own found items" ON found_items
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own found items" ON found_items
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own found items" ON found_items
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Matches
+ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view matches related to their items" ON matches
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM lost_items WHERE id = lost_item_id AND user_id = auth.uid()) OR
+    EXISTS (SELECT 1 FROM found_items WHERE id = found_item_id AND user_id = auth.uid())
+  );
+
+-- Notifications
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own notifications" ON notifications
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own notifications" ON notifications
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Reward Transactions
+ALTER TABLE reward_transactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own transactions" ON reward_transactions
+  FOR SELECT USING (auth.uid() = user_id);
+

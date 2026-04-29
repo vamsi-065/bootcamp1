@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useAuth } from "@/context/auth-context";
+
 
 interface NotificationDrawerProps {
   isOpen: boolean;
@@ -13,8 +15,8 @@ interface NotificationDrawerProps {
 }
 
 export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps) {
-  // Replace 'user_id_here' with actual user ID from Auth context
-  const { notifications, markAsRead, clearAll } = useNotifications('user_id_here');
+  const { user } = useAuth();
+  const { notifications, markAsRead, clearAll } = useNotifications(user?.id ?? null);
 
   const getIcon = (type: string) => {
     switch (type) {

@@ -38,7 +38,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85]"
+              className="text-5xl sm:text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] break-words"
             >
               The Smart Way <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-indigo-600">
@@ -89,7 +89,7 @@ export default function Home() {
           </motion.div>
 
           {/* Stats Marquee */}
-          <div className="pt-20 opacity-40 grayscale flex justify-center gap-12 text-sm font-black uppercase tracking-[0.3em]">
+          <div className="pt-20 opacity-40 grayscale flex flex-wrap justify-center gap-6 sm:gap-12 text-[10px] sm:text-sm font-black uppercase tracking-[0.3em]">
             <div className="flex items-center gap-2"><Target className="w-4 h-4" /> 89% Match Rate</div>
             <div className="flex items-center gap-2"><Zap className="w-4 h-4" /> Real-time Sync</div>
             <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Verified Only</div>

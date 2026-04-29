@@ -28,8 +28,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useChat } from "@/hooks/use-chat";
+import { useAuth } from "@/context/auth-context";
 
 export default function ChatPage() {
+  const { user } = useAuth();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState("");
   const { messages, typingUsers, sendMessage, setTypingStatus, isLoading } = useChat(selectedChat);
@@ -51,12 +53,12 @@ export default function ChatPage() {
     if (!messageInput.trim() || !selectedChat) return;
     const content = messageInput;
     setMessageInput("");
-    await sendMessage(content, 'user_id_here'); // Replace with actual user ID
+    await sendMessage(content, user?.id || 'anonymous');
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageInput(e.target.value);
-    setTypingStatus(e.target.value.length > 0, 'user_id_here');
+    setTypingStatus(e.target.value.length > 0, user?.id || 'anonymous');
   };
 
   return (

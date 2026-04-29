@@ -20,7 +20,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
+import { useAuth } from "@/context/auth-context";
 import { NotificationDrawer } from "@/components/layout/notification-drawer";
+
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
@@ -34,7 +36,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const isAdmin = true; // Mocking admin status
+  const { user, logout } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  if (!user) return null;
+
+  const initials = user.full_name 
+    ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : user.email?.slice(0, 2).toUpperCase() || '??';
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 font-sans">
@@ -88,16 +97,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <GlassCard className="p-5 border-white/20 dark:border-white/5 !rounded-[2rem]">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center font-black text-white text-lg shadow-lg">
-                JD
+                {initials}
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="text-base font-black truncate leading-tight">John Doe</p>
-                <p className="text-xs text-muted-foreground font-bold tracking-tight uppercase">Student · 23-0102</p>
+                <p className="text-base font-black truncate leading-tight">{user.full_name || 'Student'}</p>
+                <p className="text-xs text-muted-foreground font-bold tracking-tight uppercase">{user.role} · {user.student_id || 'ID N/A'}</p>
               </div>
             </div>
           </GlassCard>
           
-          <Button variant="ghost" className="w-full justify-start gap-4 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-2xl h-14 font-bold">
+          <Button 
+            variant="ghost" 
+            onClick={logout}
+            className="w-full justify-start gap-4 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-2xl h-14 font-bold"
+          >
             <LogOut className="w-6 h-6" />
             <span>Sign Out</span>
           </Button>
@@ -146,8 +159,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <NotificationDrawer isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col p-8 lg:p-16 pt-32 lg:pt-16 overflow-y-auto">
-        <div className="max-w-7xl mx-auto w-full">
+      <main className="flex-1 flex flex-col min-w-0 p-4 sm:p-8 lg:p-16 pt-32 lg:pt-16 overflow-x-hidden">
+        <div className="max-w-7xl mx-auto w-full min-w-0">
           {children}
         </div>
       </main>
