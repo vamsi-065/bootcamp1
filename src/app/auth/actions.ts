@@ -29,6 +29,7 @@ export async function signup(formData: FormData) {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
     options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
       data: {
         full_name: formData.get('full_name') as string,
         student_id: formData.get('student_id') as string,

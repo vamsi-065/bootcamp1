@@ -2,9 +2,9 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Search, ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -15,6 +15,8 @@ import { toast } from "sonner";
 export default function LoginPage() {
   const router = useRouter();
   const { signInWithGoogle, refreshSession } = useAuth();
+  const searchParams = useSearchParams();
+  const errorMsg = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const isSubmitting = useRef(false);
@@ -89,6 +91,32 @@ export default function LoginPage() {
             <h1 className="text-3xl font-black tracking-tight text-white">Welcome Back</h1>
             <p className="text-muted-foreground text-sm font-medium">Access your UniLost recovery dashboard</p>
           </div>
+
+          {errorMsg && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 space-y-3 overflow-hidden"
+            >
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-black text-white leading-tight">Authentication Error</p>
+                  <p className="text-xs text-muted-foreground font-medium">{errorMsg}</p>
+                </div>
+              </div>
+              {errorMsg.includes("expired") && (
+                <Button 
+                  variant="ghost" 
+                  className="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 transition-colors"
+                  onClick={() => router.push("/auth/register")}
+                >
+                  <RefreshCw className="w-3 h-3 mr-2" />
+                  Request New Link
+                </Button>
+              )}
+            </motion.div>
+          )}
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div className="space-y-2">
